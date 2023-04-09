@@ -43,19 +43,6 @@ const diceImg = document.querySelector('.dice');
 const createError = document.createElement('p');
 
 //Functions
-const setDiceImg = function (source) {
-  diceImg.src = source;
-};
-
-function setActivePlayer(activePlayer) {
-  if (activePlayer === 0) {
-    sectionPlayer1.classList.add('player--active');
-    sectionPlayer2.classList.remove('player--active');
-  } else {
-    sectionPlayer1.classList.remove('player--active');
-    sectionPlayer2.classList.add('player--active');
-  }
-}
 
 const showAuxiliarModal = function (text) {
   modalError.classList.remove('hidden');
@@ -66,31 +53,10 @@ const showAuxiliarModal = function (text) {
 const instructions =
   'A cada rolada de dado, os valores que sairem (current) são somados. Se clicar em "hold", esses pontos serão somados à sua pontuação e será passada a vez. Entretanto, se o dado der 1, a vez será passada automaticamente, sem que haja incremento da pontuação. Além disso, você perderá 5 pontos! O primeiro jogador que atingir 100 pontos, vence :)';
 
-const testScoreP2 = function () {
-  if (scoreP2 >= 100) {
-    sectionPlayer2.classList.add('player--winner');
-    showAuxiliarModal(`Winner winner! ${namePlayer2} 🎉🎉🎉`);
-    currentPlayer2.textContent = '🎉';
-    console.log('funcionou');
-  } else {
-    current = 0;
-    currentPlayer2.textContent = current;
-    activePlayer = 0;
-    setActivePlayer(activePlayer);
-  }
-};
-
-const testScoreP1 = function () {
-  if (scoreP1 >= 100) {
-    sectionPlayer1.classList.add('player--winner');
-    showAuxiliarModal(`Winner winner! ${namePlayer1} 🎉🎉🎉`);
-    currentPlayer1.textContent = '🎉';
-  } else {
-    current = 0;
-    currentPlayer1.textContent = current;
-    activePlayer = 1;
-    setActivePlayer(activePlayer);
-  }
+const setActivePlayer = function () {
+  activePlayer === 0 ? (activePlayer = 1) : (activePlayer = 0);
+  sectionPlayer1.classList.toggle(`player--active`);
+  sectionPlayer2.classList.toggle(`player--active`);
 };
 
 //Start
@@ -101,9 +67,7 @@ let diceValue;
 
 let current = 0;
 
-let scoreP1 = 0;
-
-let scoreP2 = 0;
+const scores = [0, 0];
 
 let activePlayer = 0;
 
@@ -135,8 +99,8 @@ btnPlayGame.addEventListener('click', function () {
 //New Game!
 btnNewGame.addEventListener('click', function () {
   diceValue = 0;
-  scoreP1 = 0;
-  scoreP2 = 0;
+  scores[0] = 0;
+  scores[1] = 0;
   activePlayer = 0;
   current = 0;
   scorePlayer1.textContent = '';
@@ -147,85 +111,41 @@ btnNewGame.addEventListener('click', function () {
     sectionPlayer1.classList.contains(`player--winner`) ||
     sectionPlayer2.classList.contains(`player--winner`)
   ) {
-    if (sectionPlayer1.classList.contains(`player--winner`)) {
-      sectionPlayer1.classList.remove('player--winner');
-    } else if (sectionPlayer2.classList.contains(`player--winner`)) {
-      sectionPlayer2.classList.remove('player--winner');
-    }
+    sectionPlayer1.classList.remove(`player--winner`);
+    sectionPlayer2.classList.remove(`player--winner`);
   }
 
-  if (sectionPlayer2.classList.contains('player--active')) {
-    sectionPlayer2.classList.remove('player--active');
-    sectionPlayer1.classList.add('player--active');
+  if (sectionPlayer2.classList.contains(`player--active`)) {
+    sectionPlayer2.classList.toggle(`player--active`);
+    sectionPlayer1.classList.toggle(`player--active`);
   }
+
   diceImg.src = 'misteryDice.png';
 });
 
 //Rolling the dice!
 btnRollDice.addEventListener('click', function () {
-  if (scoreP1 < 100 && scoreP2 < 100) {
+  if (scores[0] < 100 && scores[1] < 100) {
     //Generate Dice
     diceValue = Math.trunc(Math.random() * 6) + 1;
     console.log(diceValue);
     //Alternate Img
-    switch (diceValue) {
-      case 1:
-        setDiceImg('dice-1.png');
-        break;
-      case 2:
-        setDiceImg('dice-2.png');
-        break;
-      case 3:
-        setDiceImg('dice-3.png');
-        break;
+    diceImg.src = `dice-${diceValue}.png`;
 
-      case 4:
-        setDiceImg('dice-4.png');
-        break;
-
-      case 5:
-        setDiceImg('dice-5.png');
-        break;
-
-      case 6:
-        setDiceImg('dice-6.png');
-        break;
-    }
-    if (activePlayer === 0) {
-      if (diceValue !== 1) {
-        current += diceValue;
-        currentPlayer1.textContent = current;
-      } else {
-        if (scoreP1 >= 10) {
-          scoreP1 -= 5;
-          scorePlayer1.textContent = scoreP1;
-        } else {
-          scoreP1 = 0;
-          scorePlayer1.textContent = scoreP1;
-        }
-
-        current = 0;
-        currentPlayer1.textContent = current;
-        activePlayer = 1;
-        setActivePlayer(activePlayer);
-      }
+    if (diceValue !== 1) {
+      current += diceValue;
+      document.querySelector(`#current--${activePlayer}`).textContent = current;
     } else {
-      if (diceValue !== 1) {
-        current += diceValue;
-        currentPlayer2.textContent = current;
+      if (scores[activePlayer] >= 10) {
+        scores[activePlayer] -= 5;
       } else {
-        if (scoreP2 >= 10) {
-          scoreP2 -= 5;
-          scorePlayer2.textContent = scoreP2;
-        } else {
-          scoreP2 = 0;
-          scorePlayer2.textContent = scoreP2;
-        }
-        current = 0;
-        currentPlayer2.textContent = current;
-        activePlayer = 0;
-        setActivePlayer(activePlayer);
+        scores[activePlayer] = 0;
       }
+      document.querySelector(`#score--${activePlayer}`).textContent =
+        scores[activePlayer];
+      current = 0;
+      document.querySelector(`#current--${activePlayer}`).textContent = current;
+      setActivePlayer();
     }
   }
 });
@@ -235,15 +155,25 @@ btnHold.addEventListener('click', function () {
   if (!diceValue) {
     showAuxiliarModal('Please, roll the dice at least once!');
   } else {
-    if (scoreP1 < 100 && scoreP2 < 100) {
-      if (activePlayer === 0) {
-        scoreP1 += current;
-        scorePlayer1.textContent = scoreP1;
-        testScoreP1();
+    if (scores[0] < 100 && scores[1] < 100) {
+      scores[activePlayer] += current;
+      document.querySelector(`#score--${activePlayer}`).textContent =
+        scores[activePlayer];
+      if (scores[activePlayer] >= 100) {
+        document
+          .querySelector(`.player--${activePlayer}`)
+          .classList.toggle(`player--winner`);
+        showAuxiliarModal(
+          `Winner Winner! ${
+            activePlayer === 0 ? namePlayer1 : namePlayer2
+          } 🎉🎉🎉`
+        );
+        document.querySelector(`#current--${activePlayer}`).textContent = `🎉`;
       } else {
-        scoreP2 += current;
-        scorePlayer2.textContent = scoreP2;
-        testScoreP2();
+        current = 0;
+        document.querySelector(`#current--${activePlayer}`).textContent =
+          current;
+        setActivePlayer();
       }
     }
   }
