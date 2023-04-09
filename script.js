@@ -144,12 +144,12 @@ btnNewGame.addEventListener('click', function () {
   currentPlayer1.textContent = 0;
   currentPlayer2.textContent = 0;
   if (
-    sectionPlayer1.classList.contains('player--winner') ||
-    sectionPlayer2.classList.contains('player--winner')
+    sectionPlayer1.classList.contains(`player--winner`) ||
+    sectionPlayer2.classList.contains(`player--winner`)
   ) {
-    if (sectionPlayer1.classList.contains('player--winner')) {
+    if (sectionPlayer1.classList.contains(`player--winner`)) {
       sectionPlayer1.classList.remove('player--winner');
-    } else if (sectionPlayer2.classList.contains('player--winner')) {
+    } else if (sectionPlayer2.classList.contains(`player--winner`)) {
       sectionPlayer2.classList.remove('player--winner');
     }
   }
